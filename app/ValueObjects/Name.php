@@ -1,10 +1,10 @@
 <?php
 
-namespace App;
+namespace App\ValueObjects;
 
 use Illuminate\Support\Arr;
 
-class NameParser
+class Name
 {
     private string $input;
 
@@ -16,27 +16,12 @@ class NameParser
         $this->parts = explode(' ', $this->input);
     }
 
-    private function sanitize(string $input): string
-    {
-        return str_replace('.', '', $input);
-    }
-
-    public function parse(): array
-    {
-        return [
-            'title' => $this->parseTitle(),
-            'first_name' => $this->parseFirstName(),
-            'initial' => $this->parseInitial(),
-            'last_name' => $this->parseLastName(),
-        ];
-    }
-
-    private function parseTitle(): string
+    public function getTitle(): string
     {
         return $this->parts[0];
     }
 
-    private function parseFirstName(): ?string
+    public function getFirstName(): ?string
     {
         if (! $this->hasFirstNameOrInitial()) {
             return null;
@@ -49,7 +34,7 @@ class NameParser
         return $this->parts[1];
     }
 
-    private function parseInitial(): ?string
+    public function getInitial(): ?string
     {
         if (! $this->hasFirstNameOrInitial()) {
             return null;
@@ -62,9 +47,14 @@ class NameParser
         return $this->parts[1];
     }
 
-    private function parseLastName(): string
+    public function getLastName(): string
     {
         return Arr::last($this->parts);
+    }
+
+    private function sanitize(string $input): string
+    {
+        return str_replace('.', '', $input);
     }
 
     private function hasFirstNameOrInitial(): bool
