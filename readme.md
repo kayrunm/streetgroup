@@ -1,62 +1,64 @@
 # Homeowner Names - Technical Test
 
-> Please do not spend too long on this test, 2 hours should be more than sufficient. You may
-choose to create a full application with a basic front-end to upload the CSV, or a simple class
-that loads the CSV from the filesystem.
+I have added a full test suite for the code that I have written.
 
-You have been provided with a CSV from an estate agent containing an export of their
-homeowner data. If there are multiple homeowners, the estate agent has been entering both
-people into one field, often in different formats.
+## Parser class
 
-Our system stores person data as individual person records with the following schema:
+You can find the main CSV parsing class at `app/CsvParser`. The parser class contains two public methods,
+which are as follows:
 
-### Person
+* `withoutHeader` (chainable)
 
-- title - required
-- first_name - optional
-- initial - optional
-- last_name - required
+  This allows for a file to be parsed whether it has a header or not. The header is not used in any
+  parsing, so if the CSV file has a header it is simply skipped.
 
-Write a program that can accept the CSV and output an array of people, splitting the name into
-the correct fields, and splitting multiple people from one string where appropriate.
+* `parse`
 
-For example, the string “Mr & Mrs Smith” would be split into 2 people.
+  The `parse` method accepts one argument, `$path`, which is a path from the `resources/csvs/`
+  directory within the app where the CSV file is located.
 
-## Example Outputs
 
-Input
-`“Mr John Smith”`
+## Console command
+A console command is also provided which accepts similar arguments. The console command can be
+called by running `php artisan names:parse`. The first argument for the command is the path for the
+file which, as above, is the path to the file from the `resources/csvs/` directory within the app.
 
-Output
+A flag for skipping the header is also accepted, `--without-header`.
+
+E.g.
 ```
-$person[‘title’] => ‘Mr’,
-$person[‘first_name’] => “John”,
-$person[‘initial’] => null,
-$person[‘last_name’] => “Smith”
+php artisan names:parse examples_without_header --without-header`
 ```
 
-Input
-`“Mr and Mrs Smith”`
+## Notes
 
-Output
-```
-$person[‘title’] => ‘Mr’,
-$person[‘first_name’] => null,
-$person[‘initial’] => null,
-$person[‘last_name’] => “Smith”
-$person[‘title’] => ‘Mrs’,
-$person[‘first_name’] => null,
-$person[‘initial’] => null,
-$person[‘last_name’] => “Smith”
-```
-
-Input
-`“Mr J. Smith”`
-
-Output
+The spec (./spec.md) says the output should look like the following:
 ```
 $person[‘title’] => ‘Mr’,
 $person[‘first_name’] => null,
 $person[‘initial’] => “J”,
 $person[‘last_name’] => “Smith”
 ```
+
+But I have opted to just output the full names from the console command. The `CsvParser` class
+will output an array of `Name` value objects which expose the following methods:
+
+* `getTitle()`
+* `getFirstName()`
+* `getInitial()`
+* `getLastName()`
+
+As well as allowing you to cast the value object to a string, like so:
+
+```
+(string) (new Name('Mr. Kieran Marshall')) // Mr Kieran Marshall
+```
+
+## Assumptions
+
+Some assumptions have been made in the creation of this solution to the code test. These are as follows:
+
+1. An input with two names, in the format `[title] & [title] [first name] [last name]` will treat the two
+   names as a married couple. This means a name such as `Mr & Mrs David Beckham` would have the second name (in this case, Vicotria Beckham) named as `Mrs David Beckham`.
+
+2. An input with more than two names is invalid input.
