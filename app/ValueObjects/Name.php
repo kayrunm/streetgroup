@@ -6,14 +6,11 @@ use Illuminate\Support\Arr;
 
 class Name
 {
-    private string $input;
-
     private array $parts;
 
     public function __construct(string $input)
     {
-        $this->input = $this->sanitize($input);
-        $this->parts = explode(' ', $this->input);
+        $this->parts = explode(' ', $this->sanitize($input));
     }
 
     public function getTitle(): string
