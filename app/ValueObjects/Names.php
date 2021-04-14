@@ -12,7 +12,7 @@ class Names
     {
         $this->parts = $this->split($input);
 
-        if (count($this->parts) >2) {
+        if (count($this->parts) > 2) {
             throw NamesParsingException::tooManyNames($input);
         }
     }
