@@ -2,7 +2,9 @@
 
 namespace App\ValueObjects;
 
+use App\Exceptions\NameParsingException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class Name
 {
@@ -11,6 +13,10 @@ class Name
     public function __construct(string $input)
     {
         $this->parts = explode(' ', $this->sanitize($input));
+
+        if (count($this->parts) < 2) {
+            throw NameParsingException::notEnoughArguments($input);
+        }
     }
 
     public function getTitle(): string
@@ -47,6 +53,16 @@ class Name
     public function getLastName(): string
     {
         return Arr::last($this->parts);
+    }
+
+    public function __toString(): string
+    {
+        return Collection::make([
+            $this->getTitle(),
+            $this->getInitial(),
+            $this->getFirstName(),
+            $this->getLastName(),
+        ])->filter()->join(' ');
     }
 
     private function sanitize(string $input): string
